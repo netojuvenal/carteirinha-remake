@@ -1,11 +1,15 @@
 <?php
-    require_once(__DIR__ . '/../classes/NotificationController.php');
 
-    $response = (new NotificationController)->getNotification($_POST['idUser'], $_POST['idNotificacao']);
+require_once __DIR__ . '/../classes/NotificationController.php';
 
-    if ($response !== null) {
-        echo json_encode(['status'=> 'success', 'array' => $response]); exit();
-    } else {
-        echo json_encode(['status'=> 'error', 'message' => 'Nenhuma notificação encontrada']); exit();
-    }
-?>
+$idUser = (int)($_POST['idUser'] ?? 0);
+$idNot = isset($_POST['idNotificacao']) ? (int)$_POST['idNotificacao'] : null;
+
+$ctrl = new NotificationController();
+$response = $ctrl->getNotification($idUser, $idNot);
+
+if ($response['status']) {
+    echo json_encode(['status'=> 'success', 'array' => $response['data']]); exit();
+} else {
+    echo json_encode(['status'=> 'error', 'message' => $response['message']]); exit();
+}

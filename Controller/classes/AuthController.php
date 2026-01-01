@@ -1,67 +1,74 @@
-<?php session_start();
-    // error_reporting(E_ALL);
-    // ini_set('display_errors', 1);
-    require_once(__DIR__ . '/HomeController.php');
-    require_once(__DIR__ . '/../config.php');
-    require_once( __DIR__ . '/../../Model/classes/AuthModel.php');
-?>
-
 <?php
-    class AuthController {
-        public $homeController;
-        public $model;
 
-        public function __construct() {
-            $this->homeController = new HomeController();
-            $this->model = new AuthModel();
-        }
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../../Model/classes/AuthModel.php';
+require_once __DIR__ . '/../config.php';
 
-        // Verificar se o usuário está logado
-        public function isLoggedIn() {
-            if (!isset($_SESSION['logged_in'])) {
-                $this->showLogin();
+class AuthController extends Controller
+{
+    private $model;
+    private $homeController;
+
+    public function __construct()
+    {
+        $this->model = new AuthModel();
+        require_once __DIR__ . '/HomeController.php';
+        $this->homeController = new HomeController();
+    }
+
+
+    public function isLoggedIn()
+    {
+        if (!$this->usuarioLogado()) {
+            $this->showLogin();
+        } else {
+            $cat = $_SESSION['category'] ?? $_SESSION['categoria'] ?? '';
+            if ($cat === 'adm') {
+                $this->homeController->indexAdm();
             } else {
-                if ($_SESSION['category'] === 'adm') {
-                    $this->homeController->indexAdm();
-                } else {
-                    $this->homeController->index();
-                }
+                $this->homeController->index();
             }
-        }
-
-        // Exibir a página de login
-        public function showLogin() {
-            header(PATH . '/View/login.php'); exit();
-        }
-
-        // Ação de login
-        public function login($user, $pass) {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $matricula = $_POST['matricula'];
-                $password = $_POST['password'];
-
-                if ($this->model->login($matricula, $password)) {
-                    $data = $this->model->getDataByMatricula($matricula);
-                    if ($data !== false) {
-                        $_SESSION['id'] = $data['id'];
-                        $_SESSION['name'] = $data['nome'];
-                        $_SESSION['email'] = $data['email'];
-                        $_SESSION['telefone'] = $data['telefone'];
-                        $_SESSION['enrollment'] = $data['matricula'];
-                        $_SESSION['category'] = $data['categoria'];
-                        $_SESSION['logged_in'] = true;
-                        return ['status' => true, 'message' => 'sucesso']; 
-                    }  
-                } else {
-                    return ['status' => false, 'message' => 'Credenciais inválidas'];
-                }
-            }
-        }
-
-        // Ação de logout
-        public function logout() {
-            session_destroy(); 
-            header(PATH);
         }
     }
-?>
+
+    public function showLogin()
+    {
+        header('Location: ' . BASE_URL . '/View/login.php');
+        exit();
+    }
+
+    public function login($user, $pass)
+    {
+        if (empty($user) || empty($pass)) {
+            return ['status' => false, 'message' => 'Preencha matrícula e senha'];
+        }
+
+        if (!$this->model->login($user, $pass)) {
+            return ['status' => false, 'message' => 'Credenciais inválidas'];
+        }
+
+        $dados = $this->model->getDataByMatricula($user);
+        if ($dados === false) {
+            return ['status' => false, 'message' => 'Erro ao obter dados do usuário'];
+        }
+
+        $_SESSION['id'] = $dados['id'];
+        $_SESSION['name'] = $dados['nome'];
+        $_SESSION['email'] = $dados['email'];
+        $_SESSION['telefone'] = $dados['telefone'];
+        $_SESSION['enrollment'] = $dados['matricula'];
+        $_SESSION['matricula'] = $dados['matricula'];
+        $_SESSION['category'] = $dados['categoria'];
+        $_SESSION['categoria'] = $dados['categoria'];
+        $_SESSION['logged_in'] = true;
+
+        return ['status' => true, 'message' => 'sucesso'];
+    }
+
+    public function logout()
+    {
+        session_destroy();
+        header(PATH);
+        exit();
+    }
+}

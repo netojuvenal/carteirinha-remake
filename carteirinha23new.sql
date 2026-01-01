@@ -1,142 +1,165 @@
--- MySQL dump 10.13  Distrib 8.0.41, for Linux (x86_64)
---
--- Host: localhost    Database: carteirinha23
--- ------------------------------------------------------
--- Server version	8.0.41-0ubuntu0.24.04.1
+-- --------------------------------------------------------
+-- Banco de dados: carteirinha23 (Versão Refatorada)
+-- Compatível com o código PHP existente
+-- --------------------------------------------------------
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+DROP DATABASE IF EXISTS `carteirinha23`;
+CREATE DATABASE `carteirinha23` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `carteirinha23`;
 
---
--- Table structure for table `cardapio`
---
+-- --------------------------------------------------------
+-- Estrutura da tabela `tags_cardapio` (ADICIONADA - necessária para o código)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tags_cardapio` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(255) NOT NULL,
+  `tipo` varchar(255) DEFAULT NULL,
+  `gluten` tinyint(1) DEFAULT 0,
+  `lactose` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `cardapio`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `cardapio` (
+-- --------------------------------------------------------
+-- Estrutura da tabela `cardapio` (REFATORADA)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cardapio` (
   `id` int NOT NULL AUTO_INCREMENT,
   `data_refeicao` date NOT NULL,
-  `dia` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `principal` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `acompanhamento` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sobremesa` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `data_hora_cardapio` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `dia` varchar(255) NOT NULL,
+  `proteina` varchar(255) NOT NULL,  -- Alterado de 'acompanhamento' para 'proteina'
+  `principal` varchar(255) NOT NULL,
+  `sobremesa` varchar(255) NOT NULL,
   `ind_excluido` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `cardapio`
---
-
-LOCK TABLES `cardapio` WRITE;
-/*!40000 ALTER TABLE `cardapio` DISABLE KEYS */;
-INSERT INTO `cardapio` VALUES (47,'2024-10-21','segunda','miojo','Arroz e feijão','Maçã',0),(48,'2024-10-22','terca','miojo','Alface','Laranja',0),(49,'2024-10-23','quarta','miojo','Salada','Banana',0),(50,'2024-10-24','quinta','miojo','Farofa','a',0),(51,'2024-10-25','sexta','miojo','Batata palha','Abacaxi',0);
-/*!40000 ALTER TABLE `cardapio` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `feedback`
---
-
-DROP TABLE IF EXISTS `feedback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `feedback` (
+-- --------------------------------------------------------
+-- Estrutura da tabela `status_ref`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `status_ref` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `id_usuario` int NOT NULL,
-  `nota` int NOT NULL,
+  `descricao` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Estrutura da tabela `status_feedback`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `status_feedback` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descricao` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Estrutura da tabela `status_notification`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `status_notification` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descricao` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Estrutura da tabela `status_msg`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `status_msg` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descricao` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Estrutura da tabela `usuario`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `usuario` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `matricula` varchar(255) NOT NULL,
+  `senha` varchar(60) NOT NULL,
+  `categoria` varchar(255) NOT NULL,
+  `telefone` varchar(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_usuario` (`id_usuario`),
-  KEY `fk_nota` (`nota`),
-  CONSTRAINT `fk_nota` FOREIGN KEY (`nota`) REFERENCES `status_feedback` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `matricula` (`matricula`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `feedback`
---
-
-LOCK TABLES `feedback` WRITE;
-/*!40000 ALTER TABLE `feedback` DISABLE KEYS */;
-/*!40000 ALTER TABLE `feedback` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `horario_padrao`
---
-
-DROP TABLE IF EXISTS `horario_padrao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `horario_padrao` (
+-- --------------------------------------------------------
+-- Estrutura da tabela `justificativa`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `justificativa` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `inicio_vig` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `descricao` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Estrutura da tabela `horario_padrao`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `horario_padrao` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `inicio_vig` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fim_vig` timestamp NULL DEFAULT NULL,
   `horario` time NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `horario_padrao`
---
-
-LOCK TABLES `horario_padrao` WRITE;
-/*!40000 ALTER TABLE `horario_padrao` DISABLE KEYS */;
-INSERT INTO `horario_padrao` VALUES (1,'2024-07-17 07:10:38','2024-07-18 07:11:14','16:10:00'),(2,'2024-07-18 07:11:14','2024-07-19 07:14:12','22:11:00'),(3,'2024-07-19 07:14:12','2024-07-19 07:14:33','04:14:00'),(4,'2024-07-19 07:14:33','2024-07-26 12:19:36','09:00:00'),(5,'2024-07-26 12:19:36','2024-09-16 19:26:52','10:19:00'),(6,'2025-04-15 01:12:06','2025-04-14 03:00:00','21:26:00'),(7,'2025-04-14 03:00:00',NULL,'23:59:00');
-/*!40000 ALTER TABLE `horario_padrao` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `justificativa`
---
-
-DROP TABLE IF EXISTS `justificativa`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `justificativa` (
+-- --------------------------------------------------------
+-- Estrutura da tabela `refeicao`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `refeicao` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `descricao` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `id_usuario` int NOT NULL,
+  `id_cardapio` int NOT NULL,
+  `id_status_ref` int NOT NULL,
+  `id_justificativa` int DEFAULT NULL,
+  `data_solicitacao` date NOT NULL,
+  `hora_solicitacao` time NOT NULL,
+  `outra_justificativa` varchar(100) DEFAULT NULL,
+  `motivo_cancelamento` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_usuario` (`id_usuario`),
+  KEY `id_cardapio` (`id_cardapio`),
+  KEY `id_status` (`id_status_ref`),
+  KEY `id_justificativa` (`id_justificativa`),
+  CONSTRAINT `refeicao_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refeicao_ibfk_2` FOREIGN KEY (`id_cardapio`) REFERENCES `cardapio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refeicao_ibfk_3` FOREIGN KEY (`id_status_ref`) REFERENCES `status_ref` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `refeicao_ibfk_4` FOREIGN KEY (`id_justificativa`) REFERENCES `justificativa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `justificativa`
---
+-- --------------------------------------------------------
+-- Estrutura da tabela `feedback` (REFATORADA)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `feedback` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_usuario` int NOT NULL,
+  `id_cardapio` int NOT NULL,
+  `id_nota` int NOT NULL,
+  `comentario` text,
+  `data_feedback` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_usuario_feedback` (`id_usuario`),
+  KEY `fk_cardapio_feedback` (`id_cardapio`),
+  KEY `fk_nota_feedback` (`id_nota`),
+  CONSTRAINT `fk_usuario_feedback` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_cardapio_feedback` FOREIGN KEY (`id_cardapio`) REFERENCES `cardapio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_nota_feedback` FOREIGN KEY (`id_nota`) REFERENCES `status_feedback` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-LOCK TABLES `justificativa` WRITE;
-/*!40000 ALTER TABLE `justificativa` DISABLE KEYS */;
-INSERT INTO `justificativa` VALUES (1,'Aula no contra turno'),(2,'Transporte'),(3,'Projeto/TCC/Estágio'),(4,'Outro'),(5,'Refeição recebida por transferência');
-/*!40000 ALTER TABLE `justificativa` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `notificacao`
---
-
-DROP TABLE IF EXISTS `notificacao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `notificacao` (
+-- --------------------------------------------------------
+-- Estrutura da tabela `notificacao`
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `notificacao` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_remetente` int NOT NULL,
   `id_destinatario` int NOT NULL,
   `data` date NOT NULL,
   `hora` time NOT NULL,
-  `assunto` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mensagem` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `assunto` text NOT NULL,
+  `mensagem` text NOT NULL,
   `lida` tinyint(1) NOT NULL DEFAULT '0',
   `transferencia` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -147,220 +170,293 @@ CREATE TABLE `notificacao` (
   CONSTRAINT `fk_remetente` FOREIGN KEY (`id_remetente`) REFERENCES `usuario` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_transferencia_notification` FOREIGN KEY (`transferencia`) REFERENCES `status_notification` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `notificacao`
---
+-- --------------------------------------------------------
+-- Dados iniciais
+-- --------------------------------------------------------
 
-LOCK TABLES `notificacao` WRITE;
-/*!40000 ALTER TABLE `notificacao` DISABLE KEYS */;
-INSERT INTO `notificacao` VALUES (8,3,2,'2025-02-04','16:09:28','Transferência de Almoço','Saudações Vitor, o estudante Botteste fez a você uma solicitação de transferência de almoço!\n\nMotivo: nao quero mais',1,2),(11,1,2,'2025-02-04','17:45:02','Testando notificação','Teste notificação',1,0),(15,2,3,'2025-02-04','20:22:21','Transferência de Almoço','Saudações Botteste, o estudante Vitor fez a você uma solicitação de transferência de almoço!\n\nMotivo: nao quero mais',1,2),(16,3,2,'2025-02-04','20:40:38','Transferência de Almoço','Saudações Vitor, o estudante Botteste fez a você uma solicitação de transferência de almoço!\n\nMotivo: Passei mal e tive que ir embora',1,2),(17,1,2,'2025-02-05','06:23:10','Testando novas notificações','lorem ipsum.',1,0),(18,6,4,'2025-04-09','22:03:16','testando','a mensagem chegou?',1,0),(19,4,6,'2025-04-11','23:28:14','Transferencia de almoço','Motivo da transferência: kkkkkkkkkkkkkkkk',1,0),(20,4,6,'2025-04-11','23:26:11','testeeee','oioioi',1,0),(21,4,6,'2025-04-11','23:31:21','Transferencia de almoço','Motivo da transferência: hghfbew',1,1),(22,4,6,'2025-04-11','23:31:22','Transferencia de almoço','Motivo da transferência: hghfbew',1,0),(23,4,6,'2025-04-12','15:23:16','Transferencia de almoço','Motivo da transferência: vvvvv',1,0),(24,4,6,'2025-04-12','15:34:38','Transferencia de almoço','Motivo da transferência: lllllll',1,0),(25,4,6,'2025-04-12','17:06:41','Transferencia de almoço','Motivo da transferência: njnjnjnjnjnjjjj',1,0),(27,4,6,'2025-04-12','17:12:56','Transferencia de almoço','Motivo da transferência: ttttttttttttttttttttttttttt',1,0),(31,4,6,'2025-04-12','17:30:35','Transferencia de almoço','Motivo da transferência: aaaaaaaaaa',1,0),(36,4,6,'2025-04-12','17:39:55','Transferencia de almoço','Motivo da transferência: hhhhhhhhhhh',1,0),(37,4,6,'2025-04-12','17:44:50','Transferencia de almoço','Motivo da transferência: ssssssssssss',1,0),(38,4,6,'2025-04-14','22:22:13','Transferencia de almoço','Motivo da transferência: não quero mais',1,1),(40,4,6,'2025-04-16','21:01:58','Transferencia de almoço','Motivo da transferência: é peixe, não gosto',1,0),(41,4,6,'2025-04-16','23:25:44','Transferencia de almoço','Motivo da transferência: hoje é domingoo',1,1),(42,6,4,'2025-04-17','13:08:58','Transferencia de almoço','Motivo da transferência: ppppp',1,0),(43,6,4,'2025-04-17','13:14:05','Transferencia de almoço','Motivo da transferência: fff',1,0),(44,6,4,'2025-04-17','13:18:13','Transferencia de almoço','Motivo da transferência: eee',1,0),(45,6,4,'2025-04-17','13:23:13','Transferencia de almoço','Motivo da transferência: sss',1,0),(46,6,4,'2025-04-17','13:27:13','Transferencia de almoço','Motivo da transferência: llll',1,0),(47,4,6,'2025-04-17','13:29:45','Transferencia de almoço','Motivo da transferência: testando transferencia',1,0),(48,6,4,'2025-04-17','13:32:37','Transferencia de almoço','Motivo da transferência: ww',1,0),(49,6,4,'2025-04-17','14:22:02','Transferencia de almoço','Motivo da transferência: qqqq',1,0),(50,6,4,'2025-04-17','14:25:22','Transferencia de almoço','Motivo da transferência: aaaa',1,0),(51,4,6,'2025-04-17','14:27:22','Transferencia de almoço','Motivo da transferência: rr',1,0),(52,6,4,'2025-04-17','17:50:01','Transferencia de almoço','Motivo da transferência: kljkl',1,0),(54,4,6,'2025-04-17','18:31:47','Transferencia de almoço','Motivo da transferência: iii',1,0),(55,4,6,'2025-04-17','22:59:50','Transferencia de almoço','Motivo da transferência: çppp',1,0),(56,4,6,'2025-04-17','23:01:30','Transferencia de almoço','Motivo da transferência: ccc',1,0),(58,4,6,'2025-04-17','23:03:16','Transferencia de almoço','Motivo da transferência: aaa',1,0);
-/*!40000 ALTER TABLE `notificacao` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Inserir dados em `status_ref`
+INSERT INTO `status_ref` (`id`, `descricao`) VALUES
+(1, 'Agendada'),
+(2, 'Cancelada'),
+(3, 'Confirmada'),
+(4, 'Não compareceu'),
+(5, 'transferida');
 
---
--- Table structure for table `refeicao`
---
+-- Inserir dados em `status_feedback`
+INSERT INTO `status_feedback` (`id`, `descricao`) VALUES
+(1, 'Muito Ruim'),
+(2, 'Ruim'),
+(3, 'Neutro'),
+(4, 'Bom'),
+(5, 'Muito bom');
 
-DROP TABLE IF EXISTS `refeicao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `refeicao` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `id_usuario` int NOT NULL,
-  `id_cardapio` int NOT NULL,
-  `id_status_ref` int NOT NULL,
-  `id_justificativa` int DEFAULT NULL,
-  `data_solicitacao` date NOT NULL,
-  `hora_solicitacao` time NOT NULL,
-  `outra_justificativa` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `motivo_cancelamento` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_usuario` (`id_usuario`),
-  KEY `id_cardapio` (`id_cardapio`),
-  KEY `id_status` (`id_status_ref`),
-  KEY `id_justificativa` (`id_justificativa`),
-  CONSTRAINT `refeicao_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`),
-  CONSTRAINT `refeicao_ibfk_2` FOREIGN KEY (`id_cardapio`) REFERENCES `cardapio` (`id`),
-  CONSTRAINT `refeicao_ibfk_3` FOREIGN KEY (`id_status_ref`) REFERENCES `status_ref` (`id`),
-  CONSTRAINT `refeicao_ibfk_4` FOREIGN KEY (`id_justificativa`) REFERENCES `justificativa` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Inserir dados em `status_notification`
+INSERT INTO `status_notification` (`id`, `descricao`) VALUES
+(0, 'Sem transferência'),
+(1, 'Em processo'),
+(2, 'Transferida'),
+(3, 'Cancelada'),
+(5, 'Cancelada por tempo');
 
---
--- Dumping data for table `refeicao`
---
+-- Inserir dados em `status_msg`
+INSERT INTO `status_msg` (`id`, `descricao`) VALUES
+(1, 'Lida'),
+(2, 'Não Lida');
 
-LOCK TABLES `refeicao` WRITE;
-/*!40000 ALTER TABLE `refeicao` DISABLE KEYS */;
-INSERT INTO `refeicao` VALUES (18,2,47,1,3,'2025-02-03','16:40:39','projeto','nao quero mais'),(19,2,47,1,2,'2025-02-03','17:18:25','transporte',NULL),(20,2,48,1,1,'2025-02-04','15:45:15','contra-turno',NULL),(21,2,47,1,2,'2025-02-10','14:43:37','transporte','nao quero mais'),(22,2,47,1,2,'2025-02-10','15:14:33','transporte','nao quero mais'),(23,2,47,1,3,'2025-02-10','15:15:52','projeto',''),(24,2,47,1,1,'2025-02-10','15:16:38','contra-turno','nao quero mais'),(25,2,47,1,2,'2025-02-10','15:29:06','transporte','Passei mal e tive que ir embora'),(26,2,47,1,2,'2025-02-10','15:31:21','transporte','Passei mal e tive que ir embora'),(27,2,47,1,3,'2025-02-10','15:32:09','projeto',''),(28,2,47,1,2,'2025-02-10','16:32:57','transporte','Passei mal e tive que ir embora'),(29,2,49,1,1,'2025-02-12','19:16:48','contra-turno',NULL),(30,4,48,1,1,'2025-04-01','14:52:25','contra-turno','não quero mais'),(31,4,48,1,1,'2025-04-01','14:55:38','contra-turno','xxxx'),(32,5,48,1,1,'2025-04-01','15:02:20','contra-turno',NULL),(33,4,48,1,1,'2025-04-01','15:27:22','contra-turno','aaaa'),(34,4,48,1,1,'2025-04-01','15:33:38','contra-turno',NULL),(35,4,49,1,1,'2025-04-02','20:15:11','contra-turno',NULL),(36,4,50,1,2,'2025-04-03','16:09:32','transporte','não quero mais'),(37,4,50,1,1,'2025-04-03','18:29:41','contra-turno','nada dms'),(38,4,50,1,1,'2025-04-03','18:33:16','contra-turno','aa'),(39,4,50,1,2,'2025-04-03','18:37:43','transporte','aaaa'),(40,4,50,1,1,'2025-04-03','18:46:38','contra-turno','aaaaaaaaaaaaaa'),(41,4,50,1,2,'2025-04-03','20:11:07','transporte','mmm'),(42,4,50,1,1,'2025-04-03','20:42:54','contra-turno','qqq'),(43,6,50,1,1,'2025-04-03','20:50:10','contra-turno',NULL),(44,4,50,1,1,'2025-04-03','21:49:34','contra-turno',NULL),(45,4,47,1,1,'2025-04-05','19:09:58','contra-turno',NULL),(46,4,49,1,1,'2025-04-09','22:12:18','contra-turno',NULL),(47,4,51,1,1,'2025-04-11','22:18:24','contra-turno',NULL),(48,4,47,1,2,'2025-04-14','22:12:32','transporte','bb'),(49,4,47,1,3,'2025-04-14','22:13:29','projeto','vvvvvv'),(50,4,47,1,1,'2025-04-14','22:19:47','contra-turno',NULL),(51,4,49,5,1,'2025-04-16','20:59:12','contra-turno','aaaaaaaaaaaa'),(52,4,49,5,2,'2025-04-16','21:00:31','transporte',NULL),(53,6,49,1,5,'2025-04-16','23:03:01',NULL,'zzzzzzzzzz'),(54,4,49,2,1,'2025-04-16','23:05:29','contra-turno','ggggggg'),(55,4,49,1,3,'2025-04-16','23:25:23','projeto',NULL),(56,6,49,2,5,'2025-04-16','23:26:11',NULL,'qqqq'),(57,4,50,2,3,'2025-04-17','13:07:39','projeto','qqqqqqqqq'),(58,6,50,5,1,'2025-04-17','13:08:35','contra-turno',NULL),(59,4,50,2,5,'2025-04-17','13:09:50',NULL,'aa'),(60,4,50,2,5,'2025-04-17','13:15:40',NULL,'iii'),(61,4,50,2,5,'2025-04-17','13:19:47',NULL,'zz'),(62,4,50,2,5,'2025-04-17','13:23:36',NULL,'ddd'),(63,4,50,2,5,'2025-04-17','13:27:42',NULL,'aa'),(64,6,50,5,5,'2025-04-17','13:30:23',NULL,NULL),(65,4,50,2,5,'2025-04-17','13:33:04',NULL,'ee'),(66,6,50,5,1,'2025-04-17','14:21:47','contra-turno',NULL),(67,4,50,2,5,'2025-04-17','14:23:25',NULL,'aa'),(68,6,50,5,1,'2025-04-17','14:24:31','contra-turno',NULL),(69,4,50,5,5,'2025-04-17','14:26:14',NULL,NULL),(70,6,50,2,5,'2025-04-17','17:48:47',NULL,'qq'),(71,4,50,1,1,'2025-04-17','18:28:16','contra-turno',NULL);
-/*!40000 ALTER TABLE `refeicao` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg01_refeicao` BEFORE INSERT ON `refeicao` FOR EACH ROW SET NEW.id_status_ref = 1 */;;
+-- Inserir dados em `justificativa`
+INSERT INTO `justificativa` (`id`, `descricao`) VALUES
+(1, 'Aula no contra turno'),
+(2, 'Transporte'),
+(3, 'Projeto/TCC/Estágio'),
+(4, 'Outro'),
+(5, 'Refeição recebida por transferência');
+
+-- Inserir dados em `usuario` (com senhas MD5 para '12345')
+INSERT INTO `usuario` (`id`, `nome`, `email`, `matricula`, `senha`, `categoria`, `telefone`) VALUES
+(1, 'root', 'root@gmail.com', '20201180041', MD5('12345'), 'adm', '00'),
+(2, 'vitor', 'vitor@gmail.com', '20201180046', MD5('12345'), 'estudante', '00'),
+(3, 'botteste', 'botteste@gmail.com', '20201180011', MD5('12345'), 'estudante', '75982777354'),
+(4, 'Murilo Neves Matutino', 'mmatutino617@gmail.com', '2000', MD5('12345'), 'estudante', '71999343064'),
+(5, 'João', 'joazinhodograu@gmail.com', '2001', MD5('12345'), 'estudante', '00'),
+(6, 'Cristiano Matutino', 'cris524matutino4@gmail.com', '2002', MD5('12345'), 'estudante', '999999'),
+(7, 'adm', 'adm@gmail.com', '2003', MD5('12345'), 'adm', '55');
+
+-- Inserir dados em `tags_cardapio` (exemplos básicos)
+INSERT INTO `tags_cardapio` (`id`, `nome`, `tipo`, `gluten`, `lactose`) VALUES
+(1, 'Carne cozida', 'proteina', 0, 0),
+(2, 'Frango grelhado', 'proteina', 0, 0),
+(3, 'Peixe assado', 'proteina', 0, 0),
+(4, 'Arroz', 'acompanhamento', 0, 0),
+(5, 'Feijão', 'acompanhamento', 0, 0),
+(6, 'Macarrão', 'principal', 1, 0),
+(7, 'Purê de batata', 'acompanhamento', 0, 0),
+(8, 'Salada verde', 'acompanhamento', 0, 0),
+(9, 'Maçã', 'sobremesa', 0, 0),
+(10, 'Laranja', 'sobremesa', 0, 0),
+(11, 'Banana', 'sobremesa', 0, 0),
+(12, 'Pudim', 'sobremesa', 0, 1),
+(13, 'Miojo', 'principal', 1, 0);
+
+-- Inserir dados em `cardapio` (com data atualizada e estrutura correta)
+INSERT INTO `cardapio` (`id`, `data_refeicao`, `data_hora_cardapio`, `dia`, `proteina`, `principal`, `sobremesa`, `ind_excluido`) VALUES
+(47, DATE_ADD(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'Segunda-feira', 'Arroz e feijão', 'Carne cozida', 'Maçã', 0),
+(48, DATE_ADD(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 2 DAY), 'Terça-feira', 'Alface', 'Frango grelhado', 'Laranja', 0),
+(49, DATE_ADD(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 3 DAY), 'Quarta-feira', 'Salada', 'Peixe assado', 'Banana', 0),
+(50, DATE_ADD(CURDATE(), INTERVAL 4 DAY), DATE_ADD(CURDATE(), INTERVAL 4 DAY), 'Quinta-feira', 'Farofa', 'Miojo', 'Pudim', 0),
+(51, DATE_ADD(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY), 'Sexta-feira', 'Batata palha', 'Miojo', 'Abacaxi', 0);
+
+-- Inserir dados em `horario_padrao`
+INSERT INTO `horario_padrao` (`id`, `inicio_vig`, `fim_vig`, `horario`) VALUES
+(1, '2024-07-17 07:10:38', '2024-07-18 07:11:14', '16:10:00'),
+(2, '2024-07-18 07:11:14', '2024-07-19 07:14:12', '22:11:00'),
+(3, '2024-07-19 07:14:12', '2024-07-19 07:14:33', '04:14:00'),
+(4, '2024-07-19 07:14:33', '2024-07-26 12:19:36', '09:00:00'),
+(5, '2024-07-26 12:19:36', '2024-09-16 19:26:52', '10:19:00'),
+(6, '2025-04-15 01:12:06', '2025-04-14 03:00:00', '21:26:00'),
+(7, '2025-04-14 03:00:00', NULL, '23:59:00');
+
+-- Inserir dados em `refeicao` (dados de exemplo atualizados)
+INSERT INTO `refeicao` (`id`, `id_usuario`, `id_cardapio`, `id_status_ref`, `id_justificativa`, `data_solicitacao`, `hora_solicitacao`, `outra_justificativa`, `motivo_cancelamento`) VALUES
+(30, 4, 48, 1, 1, CURDATE(), '14:52:25', 'contra-turno', NULL),
+(32, 5, 48, 1, 1, CURDATE(), '15:02:20', 'contra-turno', NULL),
+(43, 6, 50, 1, 1, CURDATE(), '20:50:10', 'contra-turno', NULL),
+(45, 4, 47, 1, 1, CURDATE(), '19:09:58', 'contra-turno', NULL),
+(46, 4, 49, 1, 1, CURDATE(), '22:12:18', 'contra-turno', NULL),
+(47, 4, 51, 1, 1, CURDATE(), '22:18:24', 'contra-turno', NULL),
+(50, 4, 47, 1, 1, CURDATE(), '22:19:47', 'contra-turno', NULL),
+(55, 4, 49, 1, 3, CURDATE(), '23:25:23', 'projeto', NULL),
+(71, 4, 50, 1, 1, CURDATE(), '18:28:16', 'contra-turno', NULL);
+
+-- Inserir dados em `notificacao` (dados de exemplo)
+INSERT INTO `notificacao` (`id`, `id_remetente`, `id_destinatario`, `data`, `hora`, `assunto`, `mensagem`, `lida`, `transferencia`) VALUES
+(11, 1, 2, CURDATE(), '17:45:02', 'Testando notificação', 'Teste notificação', 1, 0),
+(17, 1, 2, CURDATE(), '06:23:10', 'Testando novas notificações', 'lorem ipsum.', 1, 0),
+(18, 6, 4, CURDATE(), '22:03:16', 'testando', 'a mensagem chegou?', 1, 0);
+
+-- --------------------------------------------------------
+-- Triggers (atualizados)
+-- --------------------------------------------------------
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS `trg01_refeicao`$$
+CREATE TRIGGER `trg01_refeicao` BEFORE INSERT ON `refeicao` 
+FOR EACH ROW 
+BEGIN
+    SET NEW.id_status_ref = 1; -- Status padrão: Agendada
+END$$
+
+DROP TRIGGER IF EXISTS `trg02_refeicao`$$
+CREATE TRIGGER `trg02_refeicao` BEFORE INSERT ON `refeicao` 
+FOR EACH ROW 
+BEGIN
+    SET NEW.data_solicitacao = CURDATE();
+    SET NEW.hora_solicitacao = CURTIME();
+END$$
+
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg02_refeicao` BEFORE INSERT ON `refeicao` FOR EACH ROW SET NEW.data_solicitacao = CONVERT_TZ(NOW(),'+00:00', '+00:00') */;;
+
+-- --------------------------------------------------------
+-- Views (úteis para o sistema)
+-- --------------------------------------------------------
+
+-- View para ver cardápio da semana
+CREATE OR REPLACE VIEW vw_cardapio_semana AS
+SELECT 
+    id,
+    data_refeicao,
+    data_hora_cardapio,
+    dia,
+    principal,
+    proteina,
+    sobremesa,
+    ind_excluido
+FROM cardapio
+WHERE data_refeicao >= CURDATE()
+    AND data_refeicao <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+    AND ind_excluido = 0
+ORDER BY data_refeicao;
+
+-- View para refeições agendadas hoje
+CREATE OR REPLACE VIEW vw_refeicoes_hoje AS
+SELECT 
+    r.id,
+    u.nome,
+    u.matricula,
+    c.dia,
+    c.principal,
+    c.proteina,
+    c.sobremesa,
+    sr.descricao as status,
+    j.descricao as justificativa,
+    r.hora_solicitacao
+FROM refeicao r
+JOIN usuario u ON r.id_usuario = u.id
+JOIN cardapio c ON r.id_cardapio = c.id
+JOIN status_ref sr ON r.id_status_ref = sr.id
+LEFT JOIN justificativa j ON r.id_justificativa = j.id
+WHERE r.data_solicitacao = CURDATE()
+    AND r.id_status_ref = 1
+ORDER BY r.hora_solicitacao;
+
+-- View para notificações não lidas
+CREATE OR REPLACE VIEW vw_notificacoes_nao_lidas AS
+SELECT 
+    n.id,
+    u_rem.nome as remetente,
+    u_dest.nome as destinatario,
+    n.assunto,
+    n.mensagem,
+    n.data,
+    n.hora,
+    sn.descricao as tipo_transferencia
+FROM notificacao n
+JOIN usuario u_rem ON n.id_remetente = u_rem.id
+JOIN usuario u_dest ON n.id_destinatario = u_dest.id
+LEFT JOIN status_notification sn ON n.transferencia = sn.id
+WHERE n.lida = 0
+ORDER BY n.data DESC, n.hora DESC;
+
+-- --------------------------------------------------------
+-- Índices adicionais para performance
+-- --------------------------------------------------------
+CREATE INDEX idx_cardapio_data ON cardapio(data_refeicao);
+CREATE INDEX idx_cardapio_dia ON cardapio(dia);
+CREATE INDEX idx_cardapio_excluido ON cardapio(ind_excluido);
+
+CREATE INDEX idx_refeicao_usuario_data ON refeicao(id_usuario, data_solicitacao);
+CREATE INDEX idx_refeicao_status ON refeicao(id_status_ref);
+CREATE INDEX idx_refeicao_cardapio ON refeicao(id_cardapio);
+
+CREATE INDEX idx_notificacao_destinatario ON notificacao(id_destinatario);
+CREATE INDEX idx_notificacao_lida ON notificacao(lida);
+CREATE INDEX idx_notificacao_transferencia ON notificacao(transferencia);
+
+CREATE INDEX idx_usuario_matricula ON usuario(matricula);
+CREATE INDEX idx_usuario_categoria ON usuario(categoria);
+
+-- --------------------------------------------------------
+-- Procedures úteis
+-- --------------------------------------------------------
+
+-- Procedure para agendar refeição
+DELIMITER $$
+CREATE PROCEDURE sp_agendar_refeicao(
+    IN p_id_usuario INT,
+    IN p_id_cardapio INT,
+    IN p_id_justificativa INT,
+    IN p_outra_justificativa VARCHAR(100)
+)
+BEGIN
+    DECLARE v_data_solicitacao DATE;
+    DECLARE v_hora_solicitacao TIME;
+    
+    SET v_data_solicitacao = CURDATE();
+    SET v_hora_solicitacao = CURTIME();
+    
+    INSERT INTO refeicao (
+        id_usuario, 
+        id_cardapio, 
+        id_status_ref, 
+        id_justificativa, 
+        data_solicitacao, 
+        hora_solicitacao, 
+        outra_justificativa
+    ) VALUES (
+        p_id_usuario,
+        p_id_cardapio,
+        1, -- Agendada
+        p_id_justificativa,
+        v_data_solicitacao,
+        v_hora_solicitacao,
+        p_outra_justificativa
+    );
+    
+    SELECT LAST_INSERT_ID() as id_refeicao;
+END$$
+
+-- Procedure para cancelar refeição
+CREATE PROCEDURE sp_cancelar_refeicao(
+    IN p_id_refeicao INT,
+    IN p_motivo VARCHAR(100)
+)
+BEGIN
+    UPDATE refeicao 
+    SET id_status_ref = 2, -- Cancelada
+        motivo_cancelamento = p_motivo
+    WHERE id = p_id_refeicao
+        AND id_status_ref = 1; -- Apenas se estiver agendada
+    
+    SELECT ROW_COUNT() as linhas_afetadas;
+END$$
+
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
---
--- Table structure for table `status_feedback`
---
+-- --------------------------------------------------------
+-- Comentários das tabelas
+-- --------------------------------------------------------
+ALTER TABLE `cardapio` COMMENT = 'Cardápio semanal de refeições';
+ALTER TABLE `refeicao` COMMENT = 'Registro de refeições solicitadas';
+ALTER TABLE `usuario` COMMENT = 'Usuários do sistema';
+ALTER TABLE `notificacao` COMMENT = 'Sistema de notificações';
+ALTER TABLE `feedback` COMMENT = 'Avaliações das refeições';
+ALTER TABLE `tags_cardapio` COMMENT = 'Tags para classificação dos alimentos';
 
-DROP TABLE IF EXISTS `status_feedback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `status_feedback` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- --------------------------------------------------------
+-- Verificação final da estrutura
+-- --------------------------------------------------------
+SELECT 
+    TABLE_NAME,
+    TABLE_ROWS as 'Registros',
+    DATA_LENGTH as 'Tamanho (bytes)',
+    CREATE_TIME as 'Criado em'
+FROM information_schema.TABLES 
+WHERE TABLE_SCHEMA = 'carteirinha23'
+ORDER BY TABLE_NAME;
 
---
--- Dumping data for table `status_feedback`
---
+-- Mostrar todas as tabelas criadas
+SHOW TABLES;
 
-LOCK TABLES `status_feedback` WRITE;
-/*!40000 ALTER TABLE `status_feedback` DISABLE KEYS */;
-INSERT INTO `status_feedback` VALUES (1,'Muito Ruim'),(2,'Ruim'),(3,'Neutro'),(4,'Bom'),(5,'Muito bom');
-/*!40000 ALTER TABLE `status_feedback` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `status_msg`
---
-
-DROP TABLE IF EXISTS `status_msg`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `status_msg` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `descricao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `status_msg`
---
-
-LOCK TABLES `status_msg` WRITE;
-/*!40000 ALTER TABLE `status_msg` DISABLE KEYS */;
-INSERT INTO `status_msg` VALUES (1,'Lida'),(2,'Não Lida');
-/*!40000 ALTER TABLE `status_msg` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `status_notification`
---
-
-DROP TABLE IF EXISTS `status_notification`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `status_notification` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `descricao` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `status_notification`
---
-
-LOCK TABLES `status_notification` WRITE;
-/*!40000 ALTER TABLE `status_notification` DISABLE KEYS */;
-INSERT INTO `status_notification` VALUES (0,'Sem transferência'),(1,'Em processo\r\n'),(2,'Transferida'),(3,'Cancelada'),(5,'Cancelada por tempo');
-/*!40000 ALTER TABLE `status_notification` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `status_ref`
---
-
-DROP TABLE IF EXISTS `status_ref`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `status_ref` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `descricao` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `status_ref`
---
-
-LOCK TABLES `status_ref` WRITE;
-/*!40000 ALTER TABLE `status_ref` DISABLE KEYS */;
-INSERT INTO `status_ref` VALUES (1,'Agendada'),(2,'Cancelada'),(3,'Confirmada'),(4,'Não compareceu'),(5,'transferida');
-/*!40000 ALTER TABLE `status_ref` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `usuario`
---
-
-DROP TABLE IF EXISTS `usuario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `usuario` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `nome` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `matricula` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `senha` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `categoria` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `telefone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuario`
---
-
-LOCK TABLES `usuario` WRITE;
-/*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'root','root@gmail.com','20201180041','81dc9bdb52d04dc20036dbd8313ed055','adm','00'),(2,'vitor','vitor@gmail.com','20201180046','58573b6d50c9bb551471d1227925c0b6','estudante','00'),(3,'botteste','botteste@gmail.com','20201180011','202cb962ac59075b964b07152d234b70','estudante','75982777354'),(4,'Murilo Neves Matutino','mmatutino617@gmail.com','2000','aad59eab8682a0d4cddb5648a651e32f','estudante','71999343064'),(5,'João','joazinhodograu@gmail.com','2001','698dc19d489c4e4db73e28a713eab07b','estudante','00'),(6,'Cristiano Matutino','cris524matutino4@gmail.com','2002','698dc19d489c4e4db73e28a713eab07b','estudante','999999'),(7,'adm','adm@gmail.com','2003','698dc19d489c4e4db73e28a713eab07b','adm','55');
-/*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2025-04-21 20:39:43

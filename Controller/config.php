@@ -1,46 +1,37 @@
 <?php
 
-    $base = 'http://localhost/carteirinha-remake';
+$protocol = 'http://';
+$host = 'localhost';
+$projectFolder = 'carteirinha-remake'; 
+$base = $protocol . $host . '/' . $projectFolder;
 
-    // Caminho absoluto
-    define('PATH', 'Location: ' . $base);
+define('BASE_URL', $base);
+define('PATH', 'Location: ' . $base);
 
-    // Caminho absoluto sem Location
-    define('WPATH', $base);
+define('WPATH', $base);
+define('MENU', $base . '/View/cardapio.php');
+define('LANDPAGE', $base . '/View/landpage.php');
+define('LANDPAGEADM', $base . '/View/painel-administrador.php');
+define('LOGOUT', $base . '/View/logout.php');
+define('LOGIN', $base . '/View/login.php');
+define('ABOUT', $base . '/View/sobre.php');
+define('CONTATO', $base . '/View/entre-em-contato.php');
+define('PROFILE', $base . '/View/perfil.php');
+define('QRCODEIMG', $base . '/View/assets/qr-code.png');
+define('QRCODE', $base . '/View/qr-code.php');
+define('QRCODREAD', $base . '/View/qr-code-estudante.php');
+define('PROFILEPIC', $base . '/View/assets/perfilPadrao.jpeg');
 
-    // Caminho absoluto cardapio
-    define('MENU', $base . '/View/cardapio.php');
+define('DB_HOST', 'localhost');
+define('DB_PORT', '3306');
+define('DB_NAME', 'carteirinha23');
+define('DB_USER', 'root');
+define('DB_PASS', '');
 
-    // Caminho absoluto landpage user
-    define('LANDPAGE', $base . '/View/landpage.php');
+date_default_timezone_set('America/Sao_Paulo');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-    // Caminho absoluto landpage adm
-    define('LANDPAGEADM', $base . '/View/painel-administrador.php');
-
-    // Caminho absoluto logou
-    define('LOGOUT', $base . '/View/logout.php');
-
-    // Caminho absoluto login
-    define('LOGIN', $base . '/View/login.php');
-
-    // Caminho absoluto sobre
-    define('ABOUT', $base . '/View/sobre.php');
-
-    // Caminho absoluto entre em contato
-    define('CONTATO', $base . '/View/entre-em-contato.php');
-
-    // Caminho absoluto perfil
-    define('PROFILE', $base . '/View/perfil.php');
-
-    // Caminho absoluto qr-code img
-    define('QRCODEIMG', $base . '/View/assets/qr-code.png');
-
-    // Caminho absoluto qr-code link
-    define('QRCODE', $base . '/View/qr-code.php');
-
-    // Caminho absoluto qr-code estudante
-    define('QRCODREAD', $base . '/View/qr-code-estudante.php');
-
-    // Caminho absoluto profile img
-    define('PROFILEPIC', $base . '/View/assets/perfilPadrao.jpeg');
-?>
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}

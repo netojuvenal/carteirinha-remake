@@ -1,28 +1,28 @@
 <?php
-    require_once( __DIR__ . '/../../Model/classes/RelatorioModel.php');
 
-    class RelatorioController
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../../Model/classes/RelatorioModel.php';
+
+class RelatorioController extends Controller
+{
+    private $model;
+    public function __construct()
     {
-        public $model;
-
-        public function __construct()
-        {
-            $this->model = new RelatorioModel();
-        }
-
-        public function getRelatorioFaltas($day)
-        {
-            return $this->model->getRelatorioFaltas($day);
-        }
-
-        public function getNameById($id)
-        {
-            return $this->model->getNameById($id);
-        }
-
-        public function getCardapioByInterval($inicio, $fim)
-        {
-            return $this->model->getCardapioByInterval($inicio, $fim);
-        }
+        $this->model = new RelatorioModel();
     }
-?>
+
+    public function getRelatorioFaltas($day)
+    {
+        return $this->model->getRelatorioFaltas($day);
+    }
+
+    public function getNameById($id)
+    {
+        return $this->model->getNameById($id);
+    }
+
+    public function getCardapioByInterval($inicio, $fim)
+    {
+        return $this->model->getCardapioByInterval($inicio, $fim);
+    }
+}

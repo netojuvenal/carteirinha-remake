@@ -1,11 +1,17 @@
 <?php
-    require_once(__DIR__ . '/../classes/CardapioController.php');
 
-    $response = (new CardapioController())->criarTag($_POST['nome'], $_POST['tipo'], $_POST['gluten'], $_POST['lactose']);
+require_once __DIR__ . '/../classes/CardapioController.php';
 
-    if ($response) {
-        echo json_encode(['status' => 'success', 'message' => 'Tag criada com sucesso!']); exit();
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Problemas ao criar tag!']); exit();
-    }
-?>
+$nome = $_POST['nome'] ?? '';
+$tipo = $_POST['tipo'] ?? '';
+$gluten = (int)($_POST['gluten'] ?? 0);
+$lactose = (int)($_POST['lactose'] ?? 0);
+
+$controller = new CardapioController();
+$response = $controller->criarTag($nome, $tipo, $gluten, $lactose);
+
+if ($response['status']) {
+    echo json_encode(['status' => 'success', 'message' => $response['message']]); exit();
+} else {
+    echo json_encode(['status' => 'error', 'message' => $response['message']]); exit();
+}

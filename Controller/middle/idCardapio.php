@@ -1,11 +1,11 @@
 <?php
-require_once(__DIR__ . "/../classes/CardapioController.php");
 
-$dia = $_POST['diaSemana'];
+require_once __DIR__ . '/../classes/CardapioController.php';
 
-$resoponse = (new CardapioController)->getIdCardapio($dia);
+$dia = $_POST['diaSemana'] ?? '';
+$ctrl = new CardapioController();
+$res = $ctrl->getIdCardapio($dia);
 
-if ($resoponse !== null) {
-    echo $resoponse;
+if ($res !== null) {
+    echo $res;
 }
-?>

@@ -1,12 +1,12 @@
 <?php
-    require_once(__DIR__ . '/../classes/CardapioController.php');
 
-    $response = (new CardapioController)->excluirCardapio();
+require_once __DIR__ . '/../classes/CardapioController.php';
 
-    if (is_array($response) && isset($response['status']) && $response['status'] === true) {
-        echo json_encode(['status' => 'success', 'message' => $response['message']]); exit();
-    } else {
-        $message = is_array($response) && isset($response['message']) ? $response['message'] : 'Erro desconhecido ao excluir cardápio.';
-        echo json_encode(['status' => 'error', 'message' => $message]); exit();
-    }
-?>
+$ctrl = new CardapioController();
+$response = $ctrl->excluirCardapio();
+
+if ($response['status']) {
+    echo json_encode(['status' => 'success', 'message' => $response['message']]); exit();
+} else {
+    echo json_encode(['status' => 'error', 'message' => $response['message'] ?? 'Erro desconhecido ao excluir cardápio.']); exit();
+}

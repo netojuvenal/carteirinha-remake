@@ -2,36 +2,174 @@
 
 class Model
 {
-    public $conn;
+    protected $conn;
 
-    public function __construct() {
-        require(__DIR__ . "/../connect.php");
-        $this->conn = $conn;
+    public function __construct()
+    {
+        $this->connect();
     }
 
-    protected function executeQuery($query, $params = [], $types = "") {
-        $stmt = $this->conn->prepare($query);
-        if ($params) { $stmt->bind_param($types, ...$params); }
-
-        if (!$stmt->execute()) { return false;}
-
-        if (stripos(trim($query), "SELECT") === 0) {
-            $result = $stmt->get_result();
-            return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    protected function connect()
+    {
+        if ($this->conn instanceof mysqli && $this->conn->ping()) {
+            return;
         }
 
-        return $stmt->affected_rows;
-    }
+        try {
+            require_once __DIR__ . '/../../Controller/config.php';
 
-    protected function executeUpdate($query, $params = [], $types = "") {
-        $stmt = $this->conn->prepare($query);
-        if ($params) {
-            $stmt->bind_param($types, ...$params);
+            $this->conn = new mysqli(
+                DB_HOST, 
+                DB_USER, 
+                DB_PASS, 
+                DB_NAME, 
+                DB_PORT
+            );
+
+            if ($this->conn->connect_errno) {
+                throw new Exception(
+                    "Erro ao conectar ao MySQL: (" . $this->conn->connect_errno . ") " . 
+                    $this->conn->connect_error
+                );
+            }
+
+            $this->conn->set_charset('utf8mb4');
+
+        } catch (Exception $e) {
+            error_log("Erro de conexão MySQL: " . $e->getMessage());
+            throw $e;
         }
-        $success = $stmt->execute();
-        return $success ? $stmt->affected_rows > 0 : false;
     }
 
+    protected function inferTypes(array $params): string
+    {
+        $types = '';
+        foreach ($params as $p) {
+            if (is_int($p)) {
+                $types .= 'i';
+            } elseif (is_float($p) || is_double($p)) {
+                $types .= 'd';
+            } elseif (is_null($p)) {
+                $types .= 's';
+            } else {
+                $types .= 's';
+            }
+        }
+        return $types;
+    }
+
+    protected function prepareAndExecute(string $query, array $params = [])
+    {
+        $this->connect();
+        
+        if ($this->conn === null) {
+            throw new Exception("Conexão com banco de dados não estabelecida.");
+        }
+
+        $stmt = $this->conn->prepare($query);
+        if ($stmt === false) {
+            error_log("Prepare falhou: (" . $this->conn->errno . ") " . $this->conn->error . " | SQL: $query");
+            throw new Exception("Erro ao preparar consulta SQL.");
+        }
+
+        if (!empty($params)) {
+            $types = $this->inferTypes($params);
+            $bindParams = array_merge([$types], $params);
+            
+            $refs = [];
+            foreach ($bindParams as $key => $value) {
+                $refs[$key] = &$bindParams[$key];
+            }
+            
+            if (!call_user_func_array([$stmt, 'bind_param'], $refs)) {
+                error_log("bind_param falhou: (" . $stmt->errno . ") " . $stmt->error);
+                $stmt->close();
+                throw new Exception("Erro ao vincular parâmetros SQL.");
+            }
+        }
+
+        if (!$stmt->execute()) {
+            error_log("Execute falhou: (" . $stmt->errno . ") " . $stmt->error . " | SQL: $query");
+            $stmt->close();
+            throw new Exception("Erro ao executar consulta SQL.");
+        }
+
+        return $stmt;
+    }
+
+    protected function executeQuery($query, $params = [], $types = "")
+    {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            
+            $trimmedQuery = ltrim($query);
+            if (stripos($trimmedQuery, 'SELECT') === 0 || stripos($trimmedQuery, 'SHOW') === 0) {
+                $result = $stmt->get_result();
+                if ($result === false) {
+                    $stmt->close();
+                    return [];
+                }
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+                $result->free();
+                $stmt->close();
+                return $rows ?: [];
+            }
+
+            $affected = $stmt->affected_rows;
+            $stmt->close();
+            return $affected;
+
+        } catch (Exception $e) {
+            error_log("Erro executeQuery: " . $e->getMessage() . " | SQL: $query");
+            return false;
+        }
+    }
+
+    protected function executeUpdate($query, $params = [], $types = "")
+    {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            $success = ($stmt->affected_rows >= 0);
+            $stmt->close();
+            return $success;
+        } catch (Exception $e) {
+            error_log("Erro executeUpdate: " . $e->getMessage() . " | SQL: $query");
+            return false;
+        }
+    }
+
+    protected function executeInsertAndGetId($query, $params = [], $types = "")
+    {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            $insertId = $stmt->insert_id;
+            $stmt->close();
+            return $insertId !== 0 ? $insertId : $this->conn->insert_id;
+        } catch (Exception $e) {
+            error_log("Erro executeInsertAndGetId: " . $e->getMessage() . " | SQL: $query");
+            return false;
+        }
+    }
+
+    public function select(string $query, array $params = [])
+    {
+        return $this->executeQuery($query, $params);
+    }
+
+    public function execute(string $query, array $params = [])
+    {
+        return $this->executeUpdate($query, $params);
+    }
+
+    public function insertAndGetId(string $query, array $params = [])
+    {
+        return $this->executeInsertAndGetId($query, $params);
+    }
+
+    public function __destruct()
+    {
+        if ($this->conn instanceof mysqli) {
+            $this->conn->close();
+        }
+    }
 }
-
-?>

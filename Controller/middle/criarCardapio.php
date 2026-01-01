@@ -1,12 +1,13 @@
 <?php
-    require_once(__DIR__ . '/../classes/CardapioController.php');
 
-    $cardapio = json_decode($_POST['cardapio'], true);
-    $response = (new CardapioController())->salvarCardapioSemana($cardapio);
+require_once __DIR__ . '/../classes/CardapioController.php';
 
-    if ($response) {
-        echo json_encode(['status' => 'success', 'message' => 'Cardápio criado com sucesso!']); exit();
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Problemas ao criar cardápio!']); exit();
-    }
-?>
+$cardapio = json_decode($_POST['cardapio'] ?? '[]', true);
+$controller = new CardapioController();
+$response = $controller->salvarCardapioSemana($cardapio);
+
+if ($response['status']) {
+    echo json_encode(['status' => 'success', 'message' => $response['message']]); exit();
+} else {
+    echo json_encode(['status' => 'error', 'message' => $response['message']]); exit();
+}
