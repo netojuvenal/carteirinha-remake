@@ -25,7 +25,6 @@ class NotificationController extends Controller
     {
         $notificacoes = $this->model->getNotification((int)$userId, $idNotification);
 
-        // Ajuste das transferências conforme regra antiga (12:00 / data)
         date_default_timezone_set('America/Sao_Paulo');
         $horaAtual = date("H:i:s");
         $diaAtual = date("Y-m-d");

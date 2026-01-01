@@ -6,7 +6,6 @@ class FeedbackModel extends Model
 {
     public function adicionarFeedback($nota, $idUser, $idCardapio)
     {
-        // Nota: manter a assinatura existente do seu código
         $query = "INSERT INTO feedback (id_usuario, id_cardapio, id_nota) VALUES (?, ?, ?)";
         return $this->executeUpdate($query, [$idUser, $idCardapio, $nota]);
     }

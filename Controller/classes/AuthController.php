@@ -16,9 +16,7 @@ class AuthController extends Controller
         $this->homeController = new HomeController();
     }
 
-    /**
-     * Redireciona para login ou para as home pages conforme a sessão.
-     */
+
     public function isLoggedIn()
     {
         if (!$this->usuarioLogado()) {
@@ -35,15 +33,10 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        header(PATH . '/View/login.php');
+        header('Location: ' . BASE_URL . '/View/login.php');
         exit();
     }
 
-    /**
-     * login($user, $pass)
-     * - Recebe matrícula e senha
-     * - Retorna array ['status' => bool, 'message' => string]
-     */
     public function login($user, $pass)
     {
         if (empty($user) || empty($pass)) {
@@ -59,7 +52,6 @@ class AuthController extends Controller
             return ['status' => false, 'message' => 'Erro ao obter dados do usuário'];
         }
 
-        // criar sessão uniforme
         $_SESSION['id'] = $dados['id'];
         $_SESSION['name'] = $dados['nome'];
         $_SESSION['email'] = $dados['email'];

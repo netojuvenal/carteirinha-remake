@@ -47,7 +47,6 @@ class CardapioController extends Controller
         return $this->model->getIdCardapio($diaDaSemana);
     }
 
-    // processarReserva usado por agendarAlmoco.php 
     public function processarReserva($idUser, $idJustificativa, $justificativa, $diaDaSemana)
     {
         date_default_timezone_set('America/Sao_Paulo');
@@ -91,7 +90,6 @@ class CardapioController extends Controller
         }
     }
 
-    // Métodos auxiliares que o middle usa
     public function getIdByMatricula($matricula)
     {
         return $this->model->getIdByMatricula($matricula);

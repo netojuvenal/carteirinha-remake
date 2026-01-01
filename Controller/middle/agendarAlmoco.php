@@ -24,10 +24,8 @@ $controller = new CardapioController();
 $response = $controller->processarReserva($idUser, $idJustificativa, $justificativa, $diaDaSemana);
 
 if ($response['status']) {
-    // enviar e-mail de confirmação 
     $sent = $controller->sendEmailLunch($_SESSION['email'] ?? '', $_SESSION['name'] ?? '');
     if (!$sent) {
-        // CORREÇÃO: Usar BASE_URL
         header("Location: " . BASE_URL . "/View/cardapio.php?agendamento=emailerror");
         exit();
     }

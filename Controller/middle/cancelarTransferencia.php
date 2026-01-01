@@ -7,11 +7,9 @@ $controller = new NotificationController();
 $response = $controller->cancelarTransferencia($idDest);
 
 if (is_array($response)) {
-    // controller retorna array padrão
     echo json_encode(['status' => $response['status'] ? 'success' : 'error', 'message' => $response['message']]);
     exit();
 }
 
-// retro-compatibilidade: se boolean
 echo json_encode(['status' => $response ? 'success' : 'error']);
 exit();

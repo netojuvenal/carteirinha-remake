@@ -1,9 +1,7 @@
 <?php
-// Model/classes/Model.php - VERSÃO CORRIGIDA
 
 class Model
 {
-    /** @var mysqli */
     protected $conn;
 
     public function __construct()
@@ -11,21 +9,15 @@ class Model
         $this->connect();
     }
 
-    /**
-     * Estabelece conexão com o banco de dados
-     */
     protected function connect()
     {
-        // Se já está conectado, não faz nada
         if ($this->conn instanceof mysqli && $this->conn->ping()) {
             return;
         }
 
         try {
-            // Carrega configurações
             require_once __DIR__ . '/../../Controller/config.php';
-            
-            // Cria conexão
+
             $this->conn = new mysqli(
                 DB_HOST, 
                 DB_USER, 
@@ -34,7 +26,6 @@ class Model
                 DB_PORT
             );
 
-            // Verifica erros
             if ($this->conn->connect_errno) {
                 throw new Exception(
                     "Erro ao conectar ao MySQL: (" . $this->conn->connect_errno . ") " . 
@@ -42,7 +33,6 @@ class Model
                 );
             }
 
-            // Define charset
             $this->conn->set_charset('utf8mb4');
 
         } catch (Exception $e) {
@@ -51,9 +41,6 @@ class Model
         }
     }
 
-    /**
-     * Inferir tipos para bind_param
-     */
     protected function inferTypes(array $params): string
     {
         $types = '';
@@ -71,12 +58,8 @@ class Model
         return $types;
     }
 
-    /**
-     * Prepara statement, faz bind dos parâmetros e executa
-     */
     protected function prepareAndExecute(string $query, array $params = [])
     {
-        // Garante conexão
         $this->connect();
         
         if ($this->conn === null) {
@@ -93,7 +76,6 @@ class Model
             $types = $this->inferTypes($params);
             $bindParams = array_merge([$types], $params);
             
-            // Cria referências para bind_param
             $refs = [];
             foreach ($bindParams as $key => $value) {
                 $refs[$key] = &$bindParams[$key];
@@ -115,15 +97,11 @@ class Model
         return $stmt;
     }
 
-    /**
-     * Executa SELECT e retorna array associativo
-     */
     protected function executeQuery($query, $params = [], $types = "")
     {
         try {
             $stmt = $this->prepareAndExecute($query, $params);
             
-            // Verifica se é SELECT ou SHOW
             $trimmedQuery = ltrim($query);
             if (stripos($trimmedQuery, 'SELECT') === 0 || stripos($trimmedQuery, 'SHOW') === 0) {
                 $result = $stmt->get_result();
@@ -137,7 +115,6 @@ class Model
                 return $rows ?: [];
             }
 
-            // Para outras queries, retorna affected rows
             $affected = $stmt->affected_rows;
             $stmt->close();
             return $affected;
@@ -148,9 +125,6 @@ class Model
         }
     }
 
-    /**
-     * Executa INSERT/UPDATE/DELETE
-     */
     protected function executeUpdate($query, $params = [], $types = "")
     {
         try {
@@ -164,9 +138,6 @@ class Model
         }
     }
 
-    /**
-     * Executa INSERT e retorna ID
-     */
     protected function executeInsertAndGetId($query, $params = [], $types = "")
     {
         try {
@@ -180,9 +151,6 @@ class Model
         }
     }
 
-    /**
-     * Métodos públicos de conveniência
-     */
     public function select(string $query, array $params = [])
     {
         return $this->executeQuery($query, $params);
@@ -198,9 +166,6 @@ class Model
         return $this->executeInsertAndGetId($query, $params);
     }
 
-    /**
-     * Fecha conexão
-     */
     public function __destruct()
     {
         if ($this->conn instanceof mysqli) {

@@ -11,10 +11,6 @@ class AdmController extends Controller
         $this->model = new AdmModel();
     }
 
-    /**
-     * Recebe a string $hora e chama o model
-     * Retorna array
-     */
     public function editarHorario($hora)
     {
         if (!$this->usuarioAdm()) {

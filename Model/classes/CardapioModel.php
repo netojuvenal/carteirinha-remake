@@ -106,7 +106,6 @@ class CardapioModel extends Model
 
     public function getIdByMatricula($matricula)
     {
-        // Matricula costuma ser string, portanto 's'
         $query = "SELECT id FROM usuario WHERE matricula = ?";
         $result = $this->executeQuery($query, [$matricula]);
         return ($result == null || count($result) === 0) ? false : $result[0]['id'];
@@ -118,7 +117,6 @@ class CardapioModel extends Model
         return $this->executeQuery($query);
     }
 
-    // criar tag
     public function criarTag($nome, $tipo, $gluten, $lactose)
     {
         $query = "INSERT INTO tags_cardapio (nome, tipo, gluten, lactose) VALUES (?, ?, ?, ?)";
@@ -130,14 +128,12 @@ class CardapioModel extends Model
         $results = [];
 
         if (!is_array($dados) || count($dados) === 0) {
-            // nada para salvar
             return false;
         }
 
         foreach ($dados as $linha) {
             $dia = $linha['dia'] ?? '';
             $data_refeicao = $linha['data_refeicao'] ?? '';
-            // note: dependendo de acentuação na chave do array, adapte se necessário
             $proteina = $linha['Proteína'] ?? ($linha['Proteina'] ?? ($linha['Proteina'] ?? $linha['proteina'] ?? ''));
             $principal = $linha['Principal'] ?? ($linha['principal'] ?? '');
             $sobremesa = $linha['Sobremesa'] ?? ($linha['sobremesa'] ?? '-');
@@ -146,11 +142,9 @@ class CardapioModel extends Model
             $results[] = $sucesso;
         }
 
-        // Se qualquer inserção falhar (false) retornamos false
         return in_array(false, $results, true) ? false : true;
     }
 
-    // Busca por refeições confirmadas e totaliza os registros por data
     public function getRefeicoesConfirmadas()
     {
         $sql = "
@@ -172,7 +166,6 @@ class CardapioModel extends Model
         return $result ? $result : [];
     }
 
-    // Cadastra cardápio no BD
     public function criarCardapio($dia, $data_refeicao, $proteina, $principal, $sobremesa)
     {
         $query = "INSERT INTO cardapio (dia, data_refeicao, proteina, principal, sobremesa) VALUES (?, ?, ?, ?, ?)";

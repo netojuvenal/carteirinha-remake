@@ -13,7 +13,6 @@ class PerfilController extends Controller
 
     public function setPassword($newPassword, $idUser)
     {
-        // validação simples (não faz hashing agora — você pediu pra manter md5 por enquanto)
         if (empty($newPassword) || empty($idUser)) {
             return false;
         }

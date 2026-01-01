@@ -1,5 +1,5 @@
 <?php
-// diaCardapio.php
+
 require_once __DIR__ . '/../classes/FeedbackController.php';
 $controller = new FeedbackController();
 

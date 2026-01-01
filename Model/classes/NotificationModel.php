@@ -44,7 +44,6 @@ class NotificationModel extends Model
 
     public function isActive($idUser)
     {
-        // Reaproveita lógica similar a CardapioModel::isActive
         date_default_timezone_set('America/Sao_Paulo');
         $dataAtual = date("Y-m-d");
         $query = "SELECT COUNT(*) as total FROM refeicao WHERE id_usuario = ? AND data_solicitacao = ? AND id_status_ref = 1 AND motivo_cancelamento IS NULL";
@@ -78,7 +77,6 @@ class NotificationModel extends Model
         $result = $this->changeNotificacaoType($idRemetente);
         if ($result === false) { return false; }
 
-        // mudar status da refeição do remetente para transferido
         $query = "UPDATE refeicao SET id_status_ref = 5 WHERE id_usuario = ? AND data_solicitacao = ? AND id_status_ref = 1";
         return $this->executeUpdate($query, [$idRemetente, $dataSolicitacao]);
     }

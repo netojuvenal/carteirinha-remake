@@ -10,8 +10,7 @@ class AgendamentoController extends Controller
     {
         $this->model = new AgendamentoModel();
     }
-
-    // Mantive nomes e assinaturas para compatibilidade com middlewares
+    
     public function hasAgendamento($dia, $idUser)
     {
         return $this->model->hasAgendamento($dia, $idUser);
