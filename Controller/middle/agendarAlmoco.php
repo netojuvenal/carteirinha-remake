@@ -27,12 +27,13 @@ if ($response['status']) {
     // enviar e-mail de confirmação 
     $sent = $controller->sendEmailLunch($_SESSION['email'] ?? '', $_SESSION['name'] ?? '');
     if (!$sent) {
-        header("Location: ../../View/cardapio.php?agendamento=emailerror");
+        // CORREÇÃO: Usar BASE_URL
+        header("Location: " . BASE_URL . "/View/cardapio.php?agendamento=emailerror");
         exit();
     }
-    header("Location: ../../View/cardapio.php?agendamento=success");
+    header("Location: " . BASE_URL . "/View/cardapio.php?agendamento=success");
     exit();
 } else {
-    header("Location: ../../View/cardapio.php?agendamento=error");
+    header("Location: " . BASE_URL . "/View/cardapio.php?agendamento=error");
     exit();
 }

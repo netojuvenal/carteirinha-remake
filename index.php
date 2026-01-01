@@ -1,58 +1,42 @@
 <?php
-
-
 // --- CONFIGURAÇÕES DE ERRO ---
-// Em desenvolvimento, para depurar troque '0' por '1' temporariamente.
-// Em produção deixe '0' e verifique logs via error_log().
 error_reporting(E_ALL);
-ini_set('display_errors', '0');
-
+ini_set('display_errors', '1'); // Mudar para 1 para debug
 
 $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 $cookieParams = [
-    'lifetime' => 0,                             // expira quando o navegador fecha
-    'path'     => '/',                           // disponível em todo o site
-    'domain'   => $_SERVER['HTTP_HOST'] ?? '',   // domínio atual
-    'secure'   => $secure,                       // só envia em HTTPS (se disponível)
-    'httponly' => true,                          // impede acesso por JavaScript
-    'samesite' => 'Lax'                          // ajuda a mitigar CSRF simples
+    'lifetime' => 0,
+    'path'     => '/',
+    'domain'   => $_SERVER['HTTP_HOST'] ?? '',
+    'secure'   => $secure,
+    'httponly' => true,
+    'samesite' => 'Lax'
 ];
 
-
 session_set_cookie_params($cookieParams);
-
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
 try {
-
+    // CORREÇÃO: Caminho correto para config.php
     require_once __DIR__ . '/Controller/config.php';
-
-
+    
+    // CORREÇÃO: Caminho correto para connect.php
     require_once __DIR__ . '/Model/connect.php';
-
-
+    
+    // CORREÇÃO: Caminho correto para AuthController
     require_once __DIR__ . '/Controller/classes/AuthController.php';
-} catch (Throwable $e) {
-
-    error_log("Falha ao carregar arquivos essenciais: " . $e->getMessage());
-    http_response_code(500);
-    echo "Erro ao iniciar a aplicação. Verifique os logs do servidor.";
-    exit();
-}
-
-try {
+    
     $authController = new AuthController();
     $authController->isLoggedIn();
-
-
+    
 } catch (Throwable $e) {
-
     error_log("Erro no fluxo de autenticação: " . $e->getMessage());
-    http_response_code(500);
-    echo "Erro interno. Contate o administrador.";
+    http_resonse_code(500);
+    echo "<h1>Erro interno</h1>";
+    echo "<p>Contate o administrador.</p>";
+    echo "<pre>Erro: " . htmlspecialchars($e->getMessage()) . "</pre>";
     exit();
 }

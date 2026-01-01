@@ -1,28 +1,58 @@
 <?php
+// Model/classes/Model.php - VERSÃO CORRIGIDA
 
 class Model
 {
     /** @var mysqli */
-    public $conn;
+    protected $conn;
 
     public function __construct()
     {
-        // espera que exista $conn (requisição de Model/connect.php pelo bootstrap)
-        if (!isset($conn)) {
-            // tenta carregar automaticamente se possível
-            $possible = __DIR__ . '/../connect.php';
-            if (file_exists($possible)) {
-                require_once $possible;
-            }
-        }
-
-        global $conn;
-        $this->conn = $conn;
+        $this->connect();
     }
 
     /**
-     * Inferir tipos para bind_param a partir dos valores em $params.
-     * i => integer, d => double, s => string, b => blob
+     * Estabelece conexão com o banco de dados
+     */
+    protected function connect()
+    {
+        // Se já está conectado, não faz nada
+        if ($this->conn instanceof mysqli && $this->conn->ping()) {
+            return;
+        }
+
+        try {
+            // Carrega configurações
+            require_once __DIR__ . '/../../Controller/config.php';
+            
+            // Cria conexão
+            $this->conn = new mysqli(
+                DB_HOST, 
+                DB_USER, 
+                DB_PASS, 
+                DB_NAME, 
+                DB_PORT
+            );
+
+            // Verifica erros
+            if ($this->conn->connect_errno) {
+                throw new Exception(
+                    "Erro ao conectar ao MySQL: (" . $this->conn->connect_errno . ") " . 
+                    $this->conn->connect_error
+                );
+            }
+
+            // Define charset
+            $this->conn->set_charset('utf8mb4');
+
+        } catch (Exception $e) {
+            error_log("Erro de conexão MySQL: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Inferir tipos para bind_param
      */
     protected function inferTypes(array $params): string
     {
@@ -33,7 +63,6 @@ class Model
             } elseif (is_float($p) || is_double($p)) {
                 $types .= 'd';
             } elseif (is_null($p)) {
-                // NULL: trata como string para bind (mysqli aceita)
                 $types .= 's';
             } else {
                 $types .= 's';
@@ -43,114 +72,116 @@ class Model
     }
 
     /**
-     * Prepara statement, faz bind dos parâmetros (se houver) e executa.
-     * Retorna o stmt ou false em erro.
+     * Prepara statement, faz bind dos parâmetros e executa
      */
     protected function prepareAndExecute(string $query, array $params = [])
     {
+        // Garante conexão
+        $this->connect();
+        
+        if ($this->conn === null) {
+            throw new Exception("Conexão com banco de dados não estabelecida.");
+        }
+
         $stmt = $this->conn->prepare($query);
         if ($stmt === false) {
             error_log("Prepare falhou: (" . $this->conn->errno . ") " . $this->conn->error . " | SQL: $query");
-            return false;
+            throw new Exception("Erro ao preparar consulta SQL.");
         }
 
         if (!empty($params)) {
             $types = $this->inferTypes($params);
-
-            // bind_param exige referências
+            $bindParams = array_merge([$types], $params);
+            
+            // Cria referências para bind_param
             $refs = [];
-            foreach ($params as $key => $value) {
-                $refs[$key] = &$params[$key];
+            foreach ($bindParams as $key => $value) {
+                $refs[$key] = &$bindParams[$key];
             }
-            array_unshift($refs, $types);
-
-            // usar call_user_func_array para compatibilidade
+            
             if (!call_user_func_array([$stmt, 'bind_param'], $refs)) {
-                error_log("bind_param falhou: (" . $stmt->errno . ") " . $stmt->error . " | SQL: $query");
+                error_log("bind_param falhou: (" . $stmt->errno . ") " . $stmt->error);
                 $stmt->close();
-                return false;
+                throw new Exception("Erro ao vincular parâmetros SQL.");
             }
         }
 
         if (!$stmt->execute()) {
             error_log("Execute falhou: (" . $stmt->errno . ") " . $stmt->error . " | SQL: $query");
             $stmt->close();
-            return false;
+            throw new Exception("Erro ao executar consulta SQL.");
         }
 
         return $stmt;
     }
 
     /**
-     * Executa SELECT e retorna array associativo (ou array vazio).
-     * Mantém assinaturas antigas para compatibilidade.
-     *
-     * @param string $query
-     * @param array $params
-     * @param string $types Ignorado: tipos inferidos automaticamente se não vazio
-     * @return array|false
+     * Executa SELECT e retorna array associativo
      */
     protected function executeQuery($query, $params = [], $types = "")
     {
-        // Força strings vazias para SQL SELECT; se a query não for SELECT, ainda lidamos (será retornado [])
-        $stmt = $this->prepareAndExecute($query, $params);
-        if ($stmt === false) {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            
+            // Verifica se é SELECT ou SHOW
+            $trimmedQuery = ltrim($query);
+            if (stripos($trimmedQuery, 'SELECT') === 0 || stripos($trimmedQuery, 'SHOW') === 0) {
+                $result = $stmt->get_result();
+                if ($result === false) {
+                    $stmt->close();
+                    return [];
+                }
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+                $result->free();
+                $stmt->close();
+                return $rows ?: [];
+            }
+
+            // Para outras queries, retorna affected rows
+            $affected = $stmt->affected_rows;
+            $stmt->close();
+            return $affected;
+
+        } catch (Exception $e) {
+            error_log("Erro executeQuery: " . $e->getMessage() . " | SQL: $query");
             return false;
         }
-
-        // Só SELECT retorna resultados
-        $trim = ltrim($query);
-        if (stripos($trim, 'SELECT') === 0 || stripos($trim, 'SHOW') === 0) {
-            $result = $stmt->get_result();
-            if ($result === false) {
-                // consulta sem result set 
-                $stmt->close();
-                return [];
-            }
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-            $result->free();
-            $stmt->close();
-            return $rows ?: [];
-        }
-
-        // Se chegou aqui e não é SELECT, tratamos como update/insert/delete
-        $affected = $stmt->affected_rows;
-        $stmt->close();
-        return $affected;
     }
 
     /**
-     * Executa INSERT/UPDATE/DELETE. Retorna true em caso de execução bem sucedida, false em erro.
-     * Mantém compatibilidade com assinatura antiga.
+     * Executa INSERT/UPDATE/DELETE
      */
     protected function executeUpdate($query, $params = [], $types = "")
     {
-        $stmt = $this->prepareAndExecute($query, $params);
-        if ($stmt === false) {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            $success = ($stmt->affected_rows >= 0);
+            $stmt->close();
+            return $success;
+        } catch (Exception $e) {
+            error_log("Erro executeUpdate: " . $e->getMessage() . " | SQL: $query");
             return false;
         }
-
-        // Execução ok
-        $stmt->close();
-        return true;
     }
 
     /**
-     * Executa INSERT e retorna o id inserido (ou false em erro).
+     * Executa INSERT e retorna ID
      */
     protected function executeInsertAndGetId($query, $params = [], $types = "")
     {
-        $stmt = $this->prepareAndExecute($query, $params);
-        if ($stmt === false) {
+        try {
+            $stmt = $this->prepareAndExecute($query, $params);
+            $insertId = $stmt->insert_id;
+            $stmt->close();
+            return $insertId !== 0 ? $insertId : $this->conn->insert_id;
+        } catch (Exception $e) {
+            error_log("Erro executeInsertAndGetId: " . $e->getMessage() . " | SQL: $query");
             return false;
         }
-        $insertId = $stmt->insert_id;
-        $stmt->close();
-        return $insertId !== 0 ? $insertId : $this->conn->insert_id;
     }
 
     /**
-     * Funções públicas de conveniência (encapsulamento)
+     * Métodos públicos de conveniência
      */
     public function select(string $query, array $params = [])
     {
@@ -165,5 +196,15 @@ class Model
     public function insertAndGetId(string $query, array $params = [])
     {
         return $this->executeInsertAndGetId($query, $params);
+    }
+
+    /**
+     * Fecha conexão
+     */
+    public function __destruct()
+    {
+        if ($this->conn instanceof mysqli) {
+            $this->conn->close();
+        }
     }
 }
